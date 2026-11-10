@@ -211,6 +211,9 @@ pédagogique est conservé.
 Cette application est prévue pour un ordinateur serveur accessible uniquement depuis
 le réseau local (par exemple une salle de classe ou le domicile de l'enseignant).
 
+> **Option Docker** : un déploiement clé en main (Apache + PHP 8.5 + SQLite, port
+> `8000`) est disponible. Voir [DOCKER-SETUP.md](DOCKER-SETUP.md).
+
 ### 1. Préparer l'application en mode production
 
 ```bash
