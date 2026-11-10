@@ -9,7 +9,9 @@ use App\Models\Task;
 use App\Models\TaskAssignment;
 use App\Models\Theme;
 use App\Models\User;
+use App\Notifications\PlatformNotification;
 use App\Services\NotificationService;
+use Illuminate\Support\Str;
 
 beforeEach(function () {
     $this->supervisor = User::factory()->supervisor()->create();
@@ -181,12 +183,64 @@ test('deadline reminders include quizzes without attempts', function () {
         ->and($this->otherStudent->notifications()->count())->toBe(1);
 });
 
+test('a notification can be opened from a link and redirects to its target', function () {
+    app(NotificationService::class)->notify($this->student, 'Titre', 'Message', route('student.tasks.index'));
+
+    $notification = $this->student->notifications()->first();
+
+    expect($notification->data['url'])->toBe('/etudiant/taches');
+
+    $this->actingAs($this->student)
+        ->get(route('notifications.open', $notification->id))
+        ->assertRedirect(route('student.tasks.index'));
+
+    expect($notification->fresh()->read_at)->not->toBeNull();
+});
+
+test('a notification created on localhost still opens on the host used by the device', function () {
+    app(NotificationService::class)->notify(
+        $this->student,
+        'Titre',
+        'Message',
+        'http://localhost:8000/etudiant/taches',
+    );
+
+    $notification = $this->student->notifications()->first();
+
+    expect($notification->data['url'])->toBe('/etudiant/taches');
+
+    $this->actingAs($this->student)
+        ->withServerVariables(['HTTP_HOST' => '192.168.1.50:8000'])
+        ->get('http://192.168.1.50:8000/notifications/'.$notification->id.'/ouvrir')
+        ->assertRedirect('http://192.168.1.50:8000/etudiant/taches');
+});
+
+test('an old notification storing an absolute localhost url is redirected to the current host', function () {
+    $notification = $this->student->notifications()->create([
+        'id' => (string) Str::uuid(),
+        'type' => PlatformNotification::class,
+        'data' => [
+            'title' => 'Ancienne notification',
+            'message' => 'Message',
+            'url' => 'http://localhost:8000/etudiant/taches',
+            'icon' => 'bi-bell',
+        ],
+        'read_at' => null,
+    ]);
+
+    $this->actingAs($this->student)
+        ->withServerVariables(['HTTP_HOST' => '192.168.1.50:8000'])
+        ->get('http://192.168.1.50:8000/notifications/'.$notification->id.'/ouvrir')
+        ->assertRedirect('http://192.168.1.50:8000/etudiant/taches');
+});
+
 test('a notification can be marked as read', function () {
     app(NotificationService::class)->notify($this->student, 'Titre', 'Message', route('notifications.index'));
 
     $notification = $this->student->notifications()->first();
 
     $this->actingAs($this->student)
+        ->from(route('notifications.index'))
         ->patch(route('notifications.read', $notification->id))
         ->assertRedirect(route('notifications.index'));
 

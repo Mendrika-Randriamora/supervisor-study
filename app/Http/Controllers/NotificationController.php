@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Services\NotificationService;
 use Illuminate\Http\RedirectResponse;
 use Illuminate\Http\Request;
 use Illuminate\View\View;
@@ -15,12 +16,24 @@ class NotificationController extends Controller
         ]);
     }
 
+    public function open(Request $request, string $notification): RedirectResponse
+    {
+        $item = $request->user()->notifications()->whereKey($notification)->firstOrFail();
+        $item->markAsRead();
+
+        $target = NotificationService::internalPath(
+            $item->data['url'] ?? route('notifications.index', absolute: false),
+        );
+
+        return redirect($target);
+    }
+
     public function read(Request $request, string $notification): RedirectResponse
     {
         $item = $request->user()->notifications()->whereKey($notification)->firstOrFail();
         $item->markAsRead();
 
-        return redirect($item->data['url'] ?? route('notifications.index'));
+        return back()->with('success', 'Notification marquée comme lue.');
     }
 
     public function readAll(Request $request): RedirectResponse

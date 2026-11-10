@@ -64,7 +64,7 @@
                         </div>
                         <div class="dropdown-divider"></div>
                         @forelse ($layoutNotifications as $notification)
-                            <a class="dropdown-item py-2" href="{{ route('notifications.read', $notification->id) }}">
+                            <a class="dropdown-item py-2" href="{{ route('notifications.open', $notification->id) }}">
                                 <div class="d-flex gap-2">
                                     <i class="bi {{ $notification->data['icon'] ?? 'bi-bell' }} text-primary mt-1"></i>
                                     <div>

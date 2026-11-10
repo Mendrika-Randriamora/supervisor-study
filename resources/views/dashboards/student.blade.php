@@ -117,7 +117,7 @@
                 </div>
                 <div class="card-body">
                     @forelse ($notifications as $notification)
-                        <a href="{{ route('notifications.read', $notification->id) }}" class="d-flex gap-2 py-2 text-reset {{ ! $loop->last ? 'border-bottom' : '' }}">
+                        <a href="{{ route('notifications.open', $notification->id) }}" class="d-flex gap-2 py-2 text-reset {{ ! $loop->last ? 'border-bottom' : '' }}">
                             <i class="bi {{ $notification->data['icon'] ?? 'bi-bell' }} text-primary mt-1"></i>
                             <div>
                                 <div class="small fw-semibold">{{ $notification->data['title'] ?? 'Notification' }}</div>

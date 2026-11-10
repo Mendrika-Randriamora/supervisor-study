@@ -22,7 +22,7 @@ class NotificationService
         string $type = 'info',
         ?string $key = null,
     ): void {
-        Notification::send($user, new PlatformNotification($title, $message, $url, $icon, $type, $key));
+        Notification::send($user, new PlatformNotification($title, $message, self::internalPath($url), $icon, $type, $key));
     }
 
     /** @param  Collection<int, User>  $users */
@@ -41,6 +41,25 @@ class NotificationService
     public function hasNotificationWithKey(User $user, string $key): bool
     {
         return $user->notifications()->where('data->key', $key)->exists();
+    }
+
+    /**
+     * Store internal links as root-relative paths so a notification created on
+     * one host (localhost) still opens on the correct host from another device.
+     */
+    public static function internalPath(string $url): string
+    {
+        $parts = parse_url($url);
+
+        if ($parts === false || ! isset($parts['host'])) {
+            return $url === '' ? '/' : $url;
+        }
+
+        $path = $parts['path'] ?? '/';
+        $query = isset($parts['query']) ? '?'.$parts['query'] : '';
+        $fragment = isset($parts['fragment']) ? '#'.$parts['fragment'] : '';
+
+        return $path.$query.$fragment;
     }
 
     public function exercisePublished(Exercise $exercise): void

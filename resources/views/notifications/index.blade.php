@@ -45,7 +45,7 @@
                             <div class="small text-muted mt-1">{{ $notification->data['message'] ?? '' }}</div>
                             <div class="d-flex flex-wrap gap-2 mt-2">
                                 @if (! empty($notification->data['url']))
-                                    <a href="{{ route('notifications.read', $notification->id) }}" class="btn btn-sm btn-outline-primary">
+                                    <a href="{{ route('notifications.open', $notification->id) }}" class="btn btn-sm btn-outline-primary">
                                         <i class="bi bi-arrow-right me-1"></i>Ouvrir
                                     </a>
                                 @endif

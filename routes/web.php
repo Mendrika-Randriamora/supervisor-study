@@ -32,6 +32,7 @@ Route::middleware(['auth', 'role:supervisor,student'])->group(function () {
     Route::get('/calendrier', [CalendarController::class, 'index'])->name('calendar.index');
 
     Route::get('/notifications', [NotificationController::class, 'index'])->name('notifications.index');
+    Route::get('/notifications/{notification}/ouvrir', [NotificationController::class, 'open'])->name('notifications.open');
     Route::patch('/notifications/{notification}/lue', [NotificationController::class, 'read'])->name('notifications.read');
     Route::patch('/notifications/tout-lire', [NotificationController::class, 'readAll'])->name('notifications.read-all');
 
