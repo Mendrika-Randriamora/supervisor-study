@@ -75,7 +75,7 @@ class TaskController extends Controller
                 'Tâche terminée : '.$task->title,
                 null,
                 $task,
-                null,
+                [],
                 $request->user(),
             );
         } elseif ($status !== TaskStatus::Completed && $wasCompleted) {
@@ -85,7 +85,7 @@ class TaskController extends Controller
                 'Tâche rouverte : '.$task->title,
                 null,
                 $task,
-                null,
+                [],
                 $request->user(),
             );
         }

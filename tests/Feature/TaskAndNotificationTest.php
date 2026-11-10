@@ -75,25 +75,27 @@ test('a student can move a task through statuses and completion date is preserve
 
     $this->actingAs($this->student)->patch(route('student.tasks.status', $task), [
         'status' => 'in_progress',
-    ])->assertSessionHasNoErrors();
+    ])->assertRedirect()->assertSessionHasNoErrors();
 
     expect($assignment->refresh()->status)->toBe(TaskStatus::InProgress);
 
     $this->actingAs($this->student)->patch(route('student.tasks.status', $task), [
         'status' => 'completed',
-    ])->assertSessionHasNoErrors();
+    ])->assertRedirect()->assertSessionHasNoErrors();
 
     $assignment->refresh();
     $completedAt = $assignment->completed_at;
 
     expect($assignment->status)->toBe(TaskStatus::Completed)
-        ->and($completedAt)->not->toBeNull();
+        ->and($completedAt)->not->toBeNull()
+        ->and(ActivityEvent::where('type', 'task_completed')->count())->toBe(1);
 
     $this->actingAs($this->student)->patch(route('student.tasks.status', $task), [
         'status' => 'todo',
-    ]);
+    ])->assertRedirect()->assertSessionHasNoErrors();
 
-    expect($assignment->refresh()->completed_at)->toBeNull();
+    expect($assignment->refresh()->completed_at)->toBeNull()
+        ->and(ActivityEvent::where('type', 'task_reopened')->count())->toBe(1);
 });
 
 test('overdue status is derived without being persisted', function () {
